@@ -268,35 +268,34 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
           marginBottom: "20px",
         }}
       >
-          <canvas
-      ref={canvasRef}
-      style={{
-        width: "100%",
-        height: "100%",
-        cursor: "move",
-        display: "block",
-        touchAction: "none", // prevent scrolling during drag
-      }}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      onTouchStart={(e) => {
-        e.preventDefault();
-        const touch = e.touches[0];
-        handleMouseDown({ clientX: touch.clientX, clientY: touch.clientY });
-      }}
-      onTouchMove={(e) => {
-        e.preventDefault();
-        const touch = e.touches[0];
-        handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
-      }}
-      onTouchEnd={(e) => {
-        e.preventDefault();
-        handleMouseUp();
-      }}
-    />
-
+        <canvas
+          ref={canvasRef}
+          style={{
+            width: "100%",
+            height: "100%",
+            cursor: "move",
+            display: "block",
+            touchAction: "none", // prevent scrolling during drag
+          }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={(e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            handleMouseDown({ clientX: touch.clientX, clientY: touch.clientY });
+          }}
+          onTouchMove={(e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            handleMouseUp();
+          }}
+        />
       </div>
 
       <div style={{ marginBottom: "20px" }}>
@@ -876,6 +875,26 @@ function App() {
               </div>
             </div>
           )}
+        </div>
+        {/* Footer */}
+        <div
+          style={{
+            backgroundColor: "#f9fafb",
+            borderTop: "1px solid #e5e7eb",
+            padding: "20px",
+            textAlign: "center",
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              fontSize: "0.9rem",
+              color: "#6b7280",
+              fontWeight: "500",
+            }}
+          >
+            Done by CCIC MEDIA TEAM
+          </p>
         </div>
 
         {/* Hidden Elements */}
