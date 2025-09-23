@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "CCIC Camp Meeting 2025 - Photo Upload App",
   "type": "module",
-  "homepage": "https://dacoolguy1.github.io/cm",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
