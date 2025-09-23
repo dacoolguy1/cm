@@ -2,8 +2,8 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 
 // Circle positioning constants - adjust these to match your background image
 const CIRCLE_CENTER_X = 540;
-const CIRCLE_CENTER_Y = 415;
-const CIRCLE_RADIUS = 240;
+const CIRCLE_CENTER_Y = 390;
+const CIRCLE_RADIUS = 210;
 
 // Image Cropper Component
 const ImageCropper = ({ image, onCrop, onCancel }) => {
@@ -381,7 +381,7 @@ function App() {
 
   // Load background template on component mount
   useEffect(() => {
-    console.log("Loading background template from /images/back.png");
+    console.log("Loading background template from /images/back.jpeg");
     const img = new Image();
     img.onload = () => {
       console.log(
@@ -394,7 +394,9 @@ function App() {
       setTemplateLoading(false);
     };
     img.onerror = () => {
-      console.error("Failed to load background template from /images/back.png");
+      console.error(
+        "Failed to load background template from /images/back.jpeg",
+      );
       // Create fallback background
       const canvas = document.createElement("canvas");
       canvas.width = 1080;
@@ -430,7 +432,7 @@ function App() {
       fallbackImg.src = canvas.toDataURL();
     };
 
-    img.src = "/images/back.png";
+    img.src = "/images/back.jpeg";
   }, []);
 
   const handleCircleClick = () => {
@@ -619,10 +621,12 @@ function App() {
     <div
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        backgroundColor: "#001725",
         padding: "20px",
         fontFamily:
           '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <div
@@ -631,8 +635,9 @@ function App() {
           margin: "0 auto",
           backgroundColor: "white",
           borderRadius: "20px",
-          boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
+          boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
           overflow: "hidden",
+          flex: "1",
         }}
       >
         {/* Header */}
@@ -684,7 +689,7 @@ function App() {
                     }}
                   >
                     <img
-                      src="/images/back.png"
+                      src="/images/back.jpeg"
                       alt="Camp Meeting Flyer"
                       style={{
                         width: "100%",
@@ -876,26 +881,6 @@ function App() {
             </div>
           )}
         </div>
-        {/* Footer */}
-        <div
-          style={{
-            backgroundColor: "#f9fafb",
-            borderTop: "1px solid #e5e7eb",
-            padding: "20px",
-            textAlign: "center",
-          }}
-        >
-          <p
-            style={{
-              margin: 0,
-              fontSize: "0.9rem",
-              color: "#6b7280",
-              fontWeight: "500",
-            }}
-          >
-            Done by CCIC MEDIA TEAM
-          </p>
-        </div>
 
         {/* Hidden Elements */}
         <input
@@ -907,6 +892,27 @@ function App() {
         />
         <canvas ref={canvasRef} style={{ display: "none" }} />
       </div>
+
+      {/* Footer */}
+      <footer
+        style={{
+          textAlign: "center",
+          padding: "20px",
+          color: "#ffffff",
+          fontSize: "0.9rem",
+          opacity: 0.8,
+        }}
+      >
+        Done by{" "}
+        <span
+          style={{
+            fontWeight: "bold",
+            color: "#fbbf24",
+          }}
+        >
+          CCIC MEDIA TEAM
+        </span>
+      </footer>
 
       <style>{`
         @keyframes spin {
