@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "description": "CCIC Camp Meeting 2025 - Photo Upload App",
   "type": "module",
+  "homepage": "https://ejutemiede.github.io/ccic-camp-meeting-2025",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "vercel --prod"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "deploy:vercel": "vercel --prod"
   },
   "dependencies": {
     "react": "^18.2.0",
