@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Pages Test - CCIC Camp Meeting 2025</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1a365d, #2d3748);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            color: #fbbf24;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .status {
+            font-size: 1.2em;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4caf50;
+        }
+
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .success {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        .link {
+            color: #fbbf24;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 2px solid #fbbf24;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .link:hover {
+            background: #fbbf24;
+            color: #1a365d;
+            transform: translateY(-2px);
+        }
+
+        .info {
+            background: rgba(33, 150, 243, 0.2);
+            border: 1px solid #2196f3;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .timestamp {
+            font-size: 0.9em;
+            opacity: 0.7;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 GitHub Pages is Working!</h1>
+
+        <div class="status">
+            <strong>✅ CCIC Camp Meeting 2025 - Deployment Test Successful</strong>
+        </div>
+
+        <div class="info">
+            <h3>📋 Deployment Status</h3>
+            <div class="test-item">
+                <span>GitHub Pages:</span>
+                <span class="success">✅ Active</span>
+            </div>
+            <div class="test-item">
+                <span>Static Files:</span>
+                <span class="success">✅ Loading</span>
+            </div>
+            <div class="test-item">
+                <span>CSS Styles:</span>
+                <span class="success">✅ Applied</span>
+            </div>
+            <div class="test-item">
+                <span>Repository:</span>
+                <span class="success">✅ dacoolguy1/cm</span>
+            </div>
+        </div>
+
+        <div class="info">
+            <h3>🔧 Next Steps</h3>
+            <p>Since this test page is working, your GitHub Pages deployment is successful!</p>
+            <p>If your main React app is still showing a blank page, the issue is with the app configuration, not GitHub Pages.</p>
+        </div>
+
+        <div>
+            <a href="/cm/" class="link">🚀 Go to Main App</a>
+            <a href="/cm/images/back.png" class="link">🖼️ Test Background Image</a>
+        </div>
+
+        <div class="info">
+            <h3>🐛 Troubleshooting</h3>
+            <p><strong>If the main app is blank:</strong></p>
+            <ul style="text-align: left;">
+                <li>Check browser console (F12) for JavaScript errors</li>
+                <li>Verify React app builds correctly locally</li>
+                <li>Ensure all asset paths are correct</li>
+                <li>Try hard refresh (Ctrl+F5 or Cmd+Shift+R)</li>
+            </ul>
+        </div>
+
+        <div class="timestamp">
+            <p>Last updated: <span id="timestamp"></span></p>
+            <p>Test URL: <code>https://dacoolguy1.github.io/cm/test.html</code></p>
+        </div>
+    </div>
+
+    <script>
+        // Display current timestamp
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+
+        // Test if main app assets are accessible
+        function testAsset(url, name) {
+            fetch(url)
+                .then(response => {
+                    const statusElement = document.querySelector(`[data-test="${name}"]`);
+                    if (statusElement) {
+                        if (response.ok) {
+                            statusElement.innerHTML = '<span class="success">✅ Available</span>';
+                        } else {
+                            statusElement.innerHTML = '<span class="error">❌ Not Found</span>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    const statusElement = document.querySelector(`[data-test="${name}"]`);
+                    if (statusElement) {
+                        statusElement.innerHTML = '<span class="error">❌ Error</span>';
+                    }
+                });
+        }
+
+        // Add asset test results
+        setTimeout(() => {
+            const infoDiv = document.querySelector('.info');
+            const assetTestDiv = document.createElement('div');
+            assetTestDiv.innerHTML = `
+                <h3>🔍 Asset Availability</h3>
+                <div class="test-item">
+                    <span>Background Image:</span>
+                    <span data-test="image">⏳ Testing...</span>
+                </div>
+                <div class="test-item">
+                    <span>Main App:</span>
+                    <span data-test="app">⏳ Testing...</span>
+                </div>
+            `;
+            infoDiv.appendChild(assetTestDiv);
+
+            // Test assets
+            testAsset('/cm/images/back.png', 'image');
+            testAsset('/cm/', 'app');
+        }, 1000);
+    </script>
+</body>
+</html>
