@@ -645,20 +645,27 @@ function App() {
           style={{
             background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
             color: "white",
-            padding: "30px",
+            padding: window.innerWidth <= 768 ? "20px 15px" : "30px",
             textAlign: "center",
           }}
         >
           <h1
             style={{
-              margin: "0 0 10px 0",
-              fontSize: "2.5rem",
+              margin: "0 0 8px 0",
+              fontSize: window.innerWidth <= 768 ? "1.8rem" : "2.5rem",
               fontWeight: "bold",
+              lineHeight: "1.2",
             }}
           >
             CCIC Camp Meeting 2025
           </h1>
-          <p style={{ margin: 0, fontSize: "1.1rem", opacity: 0.9 }}>
+          <p
+            style={{
+              margin: 0,
+              fontSize: window.innerWidth <= 768 ? "0.95rem" : "1.1rem",
+              opacity: 0.9,
+            }}
+          >
             Create Your Personalized Flyer
           </p>
         </div>
