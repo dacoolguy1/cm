@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-
+import { Analytics } from "@vercel/analytics/next"
 // Circle positioning constants - adjust these to match your background image
 const CIRCLE_CENTER_X = 540;
 const CIRCLE_CENTER_Y = 390;
@@ -927,6 +927,8 @@ function App() {
           100% { transform: rotate(360deg); }
         }
       `}</style>
+      {/* Add Analytics component here */}
+      <Analytics />
     </div>
   );
 }
