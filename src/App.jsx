@@ -1,10 +1,9 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 
 // Circle positioning constants - adjust these to match your background image
-const CIRCLE_CENTER_X = 540;
-const CIRCLE_CENTER_Y = 390;
-const CIRCLE_RADIUS = 210;
-
+const CIRCLE_CENTER_X = 550;
+const CIRCLE_CENTER_Y = 410;
+const CIRCLE_RADIUS = 228;
 // Image Cropper Component
 const ImageCropper = ({ image, onCrop, onCancel }) => {
   const canvasRef = useRef(null);
@@ -381,7 +380,7 @@ function App() {
 
   // Load background template on component mount
   useEffect(() => {
-    console.log("Loading background template from /images/back.jpeg");
+    console.log("Loading background template from /images/back.png");
     const img = new Image();
     img.onload = () => {
       console.log(
@@ -395,7 +394,7 @@ function App() {
     };
     img.onerror = () => {
       console.error(
-        "Failed to load background template from /images/back.jpeg",
+        "Failed to load background template from /images/back.png",
       );
       // Create fallback background
       const canvas = document.createElement("canvas");
@@ -432,7 +431,7 @@ function App() {
       fallbackImg.src = canvas.toDataURL();
     };
 
-    img.src = "/images/back.jpeg";
+    img.src = "/images/back.png";
   }, []);
 
   const handleCircleClick = () => {
@@ -696,7 +695,7 @@ function App() {
                     }}
                   >
                     <img
-                      src="/images/back.jpeg"
+                      src="/images/back.png"
                       alt="Camp Meeting Flyer"
                       style={{
                         width: "100%",
