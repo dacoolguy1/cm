@@ -1,9 +1,9 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 
 // Circle positioning constants - adjust these to match your background image
-const CIRCLE_CENTER_X = 550;
-const CIRCLE_CENTER_Y = 410;
-const CIRCLE_RADIUS = 228;
+const CIRCLE_CENTER_X = 540;
+const CIRCLE_CENTER_Y = 440;
+const CIRCLE_RADIUS = 235;
 // Image Cropper Component
 const ImageCropper = ({ image, onCrop, onCancel }) => {
   const canvasRef = useRef(null);
@@ -909,7 +909,7 @@ function App() {
           opacity: 0.8,
         }}
       >
-        Done by{" "}
+        Developed by{" "}
         <span
           style={{
             fontWeight: "bold",
