@@ -555,15 +555,83 @@ function App() {
     [backgroundTemplate],
   );
 
-  const downloadFlyer = useCallback(() => {
+  const isIOSDevice = () => {
+    if (typeof window === "undefined" || typeof navigator === "undefined") return false;
+    return (
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+    );
+  };
+
+  const downloadFlyer = useCallback(async () => {
     if (!generatedImage) return;
 
-    const link = document.createElement("a");
-    link.href = generatedImage;
-    link.download = "CCIC-Camp-Meeting-2026-Flyer.png";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      // Convert dataURL to Blob for reliable cross-platform handling
+      const parts = generatedImage.split(";base64,");
+      const contentType = parts[0].split(":")[1] || "image/png";
+      const raw = window.atob(parts[1]);
+      const rawLength = raw.length;
+      const uInt8Array = new Uint8Array(rawLength);
+      for (let i = 0; i < rawLength; ++i) {
+        uInt8Array[i] = raw.charCodeAt(i);
+      }
+      const blob = new Blob([uInt8Array], { type: contentType });
+      const fileName = "CCIC-Camp-Meeting-2026-Flyer.png";
+      const file = new File([blob], fileName, { type: contentType });
+
+      // 1. Web Share API (Best experience on iOS & Mobile devices)
+      // Opens the native iOS Share sheet where users can tap "Save Image" to save to Camera Roll
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: "CCIC Camp Meeting 2026 Flyer",
+            text: "Here is my personalized CCIC Camp Meeting 2026 flyer! #WalkingInDominion",
+          });
+          return;
+        } catch (shareErr) {
+          if (shareErr.name === "AbortError") {
+            // User cancelled share sheet
+            return;
+          }
+          console.warn("navigator.share was rejected, trying blob download:", shareErr);
+        }
+      }
+
+      // 2. Standard Blob Download for Android & Desktop
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = fileName;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Clean up object URL
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+      }, 5000);
+
+      // 3. Fallback for iOS browsers where programmatic anchor download is blocked
+      if (isIOSDevice()) {
+        const newWindow = window.open(blobUrl, "_blank");
+        if (!newWindow) {
+          window.location.href = blobUrl;
+        }
+      }
+    } catch (error) {
+      console.error("Error during flyer download:", error);
+      // Traditional fallback
+      const link = document.createElement("a");
+      link.href = generatedImage;
+      link.download = "CCIC-Camp-Meeting-2026-Flyer.png";
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   }, [generatedImage]);
 
   const resetApp = () => {
@@ -865,6 +933,9 @@ function App() {
                     maxWidth: "420px",
                     height: "auto",
                     display: "block",
+                    WebkitTouchCallout: "default",
+                    userSelect: "auto",
+                    WebkitUserSelect: "auto",
                   }}
                 />
               </div>
@@ -892,7 +963,7 @@ function App() {
                     boxShadow: "0 6px 20px rgba(217, 119, 6, 0.4)",
                   }}
                 >
-                  📥 Download Flyer
+                  📥 Save / Download Flyer
                 </button>
                 <button
                   onClick={resetApp}
@@ -910,6 +981,25 @@ function App() {
                 >
                   🔄 Create Another
                 </button>
+              </div>
+
+              {/* iOS specific tip */}
+              <div
+                style={{
+                  marginTop: "20px",
+                  padding: "12px 18px",
+                  backgroundColor: "#fef3c7",
+                  borderRadius: "14px",
+                  border: "1px dashed #d97706",
+                  color: "#78350f",
+                  fontSize: "0.88rem",
+                  lineHeight: "1.45",
+                  maxWidth: "420px",
+                  margin: "20px auto 0",
+                  textAlign: "center",
+                }}
+              >
+                📱 <strong>iPhone Tip:</strong> Tap <strong>"Save / Download Flyer"</strong> and select <strong>"Save Image"</strong> to save directly to your Photos. You can also press &amp; hold the flyer image above and choose <strong>"Save to Photos"</strong>.
               </div>
             </div>
           )}
