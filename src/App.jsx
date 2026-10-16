@@ -1,10 +1,16 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 
-// Circle positioning constants - adjust these to match your background image
-const CIRCLE_CENTER_X = 540;
-const CIRCLE_CENTER_Y = 440;
-const CIRCLE_RADIUS = 235;
-// Image Cropper Component
+// Camp Meeting 2026 - Photo Slot Coordinates on 1080x1350 template
+const CANVAS_WIDTH = 1080;
+const CANVAS_HEIGHT = 1350;
+const PHOTO_SLOT = {
+  x: 71,
+  y: 418,
+  width: 414,
+  height: 551,
+};
+
+// Image Cropper Component (Rectangular for 2026 Flyer)
 const ImageCropper = ({ image, onCrop, onCancel }) => {
   const canvasRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -14,8 +20,10 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
   const [imageScale, setImageScale] = useState(1);
   const [resizeStart, setResizeStart] = useState({ scale: 1, y: 0 });
 
-  const cropAreaSize = 300;
-  const minScale = 0.5;
+  // Crop area sized for preview (matching 414:551 aspect ratio ≈ 0.7513)
+  const cropAreaHeight = 320;
+  const cropAreaWidth = Math.round(cropAreaHeight * (PHOTO_SLOT.width / PHOTO_SLOT.height)); // ~240px
+  const minScale = 0.3;
   const maxScale = 3;
 
   useEffect(() => {
@@ -26,13 +34,15 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
       const centerY = rect.height / 2;
 
       const imgAspect = image.naturalWidth / image.naturalHeight;
-      const cropAspect = 1; // Circle is 1:1
+      const cropAspect = cropAreaWidth / cropAreaHeight;
 
       let initialScale;
       if (imgAspect > cropAspect) {
-        initialScale = cropAreaSize / image.naturalHeight;
+        // Image is wider than crop box - match height
+        initialScale = cropAreaHeight / image.naturalHeight;
       } else {
-        initialScale = cropAreaSize / image.naturalWidth;
+        // Image is narrower than crop box - match width
+        initialScale = cropAreaWidth / image.naturalWidth;
       }
 
       setImageScale(initialScale);
@@ -41,7 +51,7 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
         y: centerY - (image.naturalHeight * initialScale) / 2,
       });
     }
-  }, [image]);
+  }, [image, cropAreaWidth, cropAreaHeight]);
 
   const drawCanvas = useCallback(() => {
     if (!canvasRef.current || !image) return;
@@ -65,54 +75,39 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
       image.naturalHeight * imageScale,
     );
 
-    // Draw overlay
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    // Draw dimmed overlay
+    ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
     ctx.fillRect(0, 0, rect.width, rect.height);
 
-    // Create circular crop area
+    // Cut out rectangular crop area
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    const radius = cropAreaSize / 2;
+    const cropX = centerX - cropAreaWidth / 2;
+    const cropY = centerY - cropAreaHeight / 2;
 
     ctx.save();
     ctx.globalCompositeOperation = "destination-out";
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    ctx.fill();
+    ctx.fillRect(cropX, cropY, cropAreaWidth, cropAreaHeight);
     ctx.restore();
 
-    // Draw crop circle border
-    ctx.strokeStyle = "#3b82f6";
+    // Draw crop border
+    ctx.strokeStyle = "#f59e0b";
     ctx.lineWidth = 3;
-    ctx.setLineDash([10, 5]);
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    ctx.stroke();
+    ctx.setLineDash([8, 4]);
+    ctx.strokeRect(cropX, cropY, cropAreaWidth, cropAreaHeight);
     ctx.setLineDash([]);
 
     // Draw corner handles for resizing
-    const handleSize = 20;
+    const handleSize = 16;
     const handlePositions = [
-      {
-        x: centerX + radius - handleSize / 2,
-        y: centerY - radius + handleSize / 2,
-      },
-      {
-        x: centerX + radius - handleSize / 2,
-        y: centerY + radius - handleSize / 2,
-      },
-      {
-        x: centerX - radius + handleSize / 2,
-        y: centerY + radius - handleSize / 2,
-      },
-      {
-        x: centerX - radius + handleSize / 2,
-        y: centerY - radius + handleSize / 2,
-      },
+      { x: cropX, y: cropY },
+      { x: cropX + cropAreaWidth, y: cropY },
+      { x: cropX, y: cropY + cropAreaHeight },
+      { x: cropX + cropAreaWidth, y: cropY + cropAreaHeight },
     ];
 
     handlePositions.forEach((pos) => {
-      ctx.fillStyle = "#3b82f6";
+      ctx.fillStyle = "#b45309";
       ctx.fillRect(
         pos.x - handleSize / 2,
         pos.y - handleSize / 2,
@@ -127,7 +122,7 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
         handleSize - 4,
       );
     });
-  }, [image, imagePosition, imageScale]);
+  }, [image, imagePosition, imageScale, cropAreaWidth, cropAreaHeight]);
 
   useEffect(() => {
     drawCanvas();
@@ -141,26 +136,15 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
 
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    const radius = cropAreaSize / 2;
+    const cropX = centerX - cropAreaWidth / 2;
+    const cropY = centerY - cropAreaHeight / 2;
 
-    const handleSize = 20;
+    const handleSize = 24;
     const handlePositions = [
-      {
-        x: centerX + radius - handleSize / 2,
-        y: centerY - radius + handleSize / 2,
-      },
-      {
-        x: centerX + radius - handleSize / 2,
-        y: centerY + radius - handleSize / 2,
-      },
-      {
-        x: centerX - radius + handleSize / 2,
-        y: centerY + radius - handleSize / 2,
-      },
-      {
-        x: centerX - radius + handleSize / 2,
-        y: centerY - radius + handleSize / 2,
-      },
+      { x: cropX, y: cropY },
+      { x: cropX + cropAreaWidth, y: cropY },
+      { x: cropX, y: cropY + cropAreaHeight },
+      { x: cropX + cropAreaWidth, y: cropY + cropAreaHeight },
     ];
 
     const clickedHandle = handlePositions.find(
@@ -181,19 +165,18 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
   };
 
   const handleMouseMove = (e) => {
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
     if (isDragging) {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
       setImagePosition({
         x: x - dragStart.x,
         y: y - dragStart.y,
       });
     } else if (isResizing) {
-      const deltaY = y - resizeStart.y;
-      const scaleFactor = 1 + deltaY * 0.01;
+      const deltaY = e.clientY - resizeStart.y;
+      const scaleFactor = 1 - deltaY * 0.008;
       const newScale = Math.max(
         minScale,
         Math.min(maxScale, resizeStart.scale * scaleFactor),
@@ -214,20 +197,23 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
     const rect = canvas.getBoundingClientRect();
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    const radius = cropAreaSize / 2;
+    const cropX = centerX - cropAreaWidth / 2;
+    const cropY = centerY - cropAreaHeight / 2;
 
     const cropCanvas = document.createElement("canvas");
     const cropCtx = cropCanvas.getContext("2d");
-    cropCanvas.width = radius * 2;
-    cropCanvas.height = radius * 2;
+    cropCanvas.width = PHOTO_SLOT.width;
+    cropCanvas.height = PHOTO_SLOT.height;
 
-    const scaleX = image.naturalWidth / (image.naturalWidth * imageScale);
-    const scaleY = image.naturalHeight / (image.naturalHeight * imageScale);
+    const renderedWidth = image.naturalWidth * imageScale;
+    const renderedHeight = image.naturalHeight * imageScale;
+    const scaleX = image.naturalWidth / renderedWidth;
+    const scaleY = image.naturalHeight / renderedHeight;
 
-    const sourceX = (centerX - imagePosition.x - radius) * scaleX;
-    const sourceY = (centerY - imagePosition.y - radius) * scaleY;
-    const sourceWidth = radius * 2 * scaleX;
-    const sourceHeight = radius * 2 * scaleY;
+    const sourceX = (cropX - imagePosition.x) * scaleX;
+    const sourceY = (cropY - imagePosition.y) * scaleY;
+    const sourceWidth = cropAreaWidth * scaleX;
+    const sourceHeight = cropAreaHeight * scaleY;
 
     cropCtx.drawImage(
       image,
@@ -237,13 +223,13 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
       sourceHeight,
       0,
       0,
-      radius * 2,
-      radius * 2,
+      PHOTO_SLOT.width,
+      PHOTO_SLOT.height,
     );
 
     const croppedImage = new Image();
     croppedImage.onload = () => onCrop(croppedImage);
-    croppedImage.src = cropCanvas.toDataURL();
+    croppedImage.src = cropCanvas.toDataURL("image/png");
   };
 
   return (
@@ -254,17 +240,18 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
         Adjust Your Photo
       </h3>
       <p style={{ marginBottom: "20px", color: "#6b7280", fontSize: "0.9rem" }}>
-        Drag to move • Use corner handles to resize
+        Drag to position • Use the slider or corner handles to resize
       </p>
 
       <div
         style={{
           width: "100%",
-          height: "400px",
-          border: "2px solid #e5e7eb",
+          height: "440px",
+          border: "2px solid #fde68a",
           borderRadius: "15px",
           overflow: "hidden",
           marginBottom: "20px",
+          backgroundColor: "#18181b",
         }}
       >
         <canvas
@@ -272,9 +259,9 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
           style={{
             width: "100%",
             height: "100%",
-            cursor: "move",
+            cursor: isDragging ? "grabbing" : "grab",
             display: "block",
-            touchAction: "none", // prevent scrolling during drag
+            touchAction: "none",
           }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
@@ -297,32 +284,30 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
         />
       </div>
 
-      <div style={{ marginBottom: "20px" }}>
-        <label
-          style={{
-            fontWeight: "bold",
-            color: "#374151",
-            display: "block",
-            marginBottom: "10px",
-          }}
-        >
-          Size: {Math.round(imageScale * 100)}%
-        </label>
+      <div style={{ marginBottom: "20px", maxWidth: "400px", margin: "0 auto 20px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+          <label style={{ fontWeight: "600", color: "#374151", fontSize: "0.95rem" }}>
+            Zoom / Size
+          </label>
+          <span style={{ color: "#d97706", fontWeight: "bold" }}>
+            {Math.round(imageScale * 100)}%
+          </span>
+        </div>
         <input
           type="range"
           min={minScale}
           max={maxScale}
-          step="0.1"
+          step="0.05"
           value={imageScale}
           onChange={(e) => setImageScale(parseFloat(e.target.value))}
           style={{
             width: "100%",
             height: "8px",
             borderRadius: "5px",
-            background: "#e5e7eb",
+            background: "#fde68a",
             outline: "none",
-            WebkitAppearance: "none",
-            appearance: "none",
+            accentColor: "#d97706",
+            cursor: "pointer",
           }}
         />
       </div>
@@ -331,15 +316,15 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
         <button
           onClick={onCancel}
           style={{
-            padding: "12px 24px",
+            padding: "12px 28px",
             border: "none",
-            borderRadius: "25px",
+            borderRadius: "30px",
             fontSize: "1rem",
             fontWeight: "bold",
             cursor: "pointer",
             transition: "all 0.3s ease",
-            backgroundColor: "#6b7280",
-            color: "white",
+            backgroundColor: "#e5e7eb",
+            color: "#374151",
           }}
         >
           Cancel
@@ -347,19 +332,19 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
         <button
           onClick={handleCrop}
           style={{
-            padding: "12px 24px",
+            padding: "12px 32px",
             border: "none",
-            borderRadius: "25px",
+            borderRadius: "30px",
             fontSize: "1rem",
             fontWeight: "bold",
             cursor: "pointer",
             transition: "all 0.3s ease",
-            backgroundColor: "#3b82f6",
+            background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
             color: "white",
-            boxShadow: "0 4px 15px rgba(59, 130, 246, 0.3)",
+            boxShadow: "0 4px 15px rgba(217, 119, 6, 0.4)",
           }}
         >
-          Apply Crop
+          Apply Photo
         </button>
       </div>
     </div>
@@ -369,7 +354,7 @@ const ImageCropper = ({ image, onCrop, onCancel }) => {
 function App() {
   const [step, setStep] = useState("initial");
   const [userImage, setUserImage] = useState(null);
-  const [croppedImage, setCroppedImage] = useState(null);
+  const [, setCroppedImage] = useState(null);
   const [backgroundTemplate, setBackgroundTemplate] = useState(null);
   const [generatedImage, setGeneratedImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -378,9 +363,9 @@ function App() {
   const fileInputRef = useRef(null);
   const canvasRef = useRef(null);
 
-  // Load background template on component mount
+  // Load background template (back2.png for Camp Meeting 2026)
   useEffect(() => {
-    console.log("Loading background template from /images/back.png");
+    console.log("Loading background template from /images/back2.png");
     const img = new Image();
     img.onload = () => {
       console.log(
@@ -394,34 +379,36 @@ function App() {
     };
     img.onerror = () => {
       console.error(
-        "Failed to load background template from /images/back.png",
+        "Failed to load background template from /images/back2.png",
       );
-      // Create fallback background
+      // Create fallback background matching 2026 1080x1350 gold theme
       const canvas = document.createElement("canvas");
-      canvas.width = 1080;
-      canvas.height = 1080;
+      canvas.width = CANVAS_WIDTH;
+      canvas.height = CANVAS_HEIGHT;
       const ctx = canvas.getContext("2d");
 
-      const gradient = ctx.createLinearGradient(0, 0, 0, 1080);
-      gradient.addColorStop(0, "#1a365d");
-      gradient.addColorStop(1, "#2d3748");
+      const gradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+      gradient.addColorStop(0, "#fef3c7");
+      gradient.addColorStop(0.5, "#fde68a");
+      gradient.addColorStop(1, "#d97706");
       ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 1080, 1080);
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-      ctx.fillStyle = "#fbbf24";
-      ctx.font = "bold 60px Arial";
+      ctx.fillStyle = "#78350f";
+      ctx.font = "bold 56px Arial";
       ctx.textAlign = "center";
-      ctx.fillText("CCIC Camp Meeting 2025", 540, 200);
+      ctx.fillText("CAMPMEETING 2026", 540, 220);
 
-      ctx.strokeStyle = "#fbbf24";
-      ctx.lineWidth = 8;
-      ctx.beginPath();
-      ctx.arc(540, 450, 180, 0, 2 * Math.PI);
-      ctx.stroke();
+      ctx.font = "bold 44px Arial";
+      ctx.fillText("WALKING IN DOMINION", 540, 290);
 
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "30px Arial";
-      ctx.fillText("I will be attending", 540, 700);
+      ctx.strokeStyle = "#92400e";
+      ctx.lineWidth = 6;
+      ctx.strokeRect(PHOTO_SLOT.x, PHOTO_SLOT.y, PHOTO_SLOT.width, PHOTO_SLOT.height);
+
+      ctx.fillStyle = "#92400e";
+      ctx.font = "28px Arial";
+      ctx.fillText("Photo Slot", PHOTO_SLOT.x + PHOTO_SLOT.width / 2, PHOTO_SLOT.y + PHOTO_SLOT.height / 2);
 
       const fallbackImg = new Image();
       fallbackImg.onload = () => {
@@ -431,10 +418,10 @@ function App() {
       fallbackImg.src = canvas.toDataURL();
     };
 
-    img.src = "/images/back.png";
+    img.src = "/images/back2.png";
   }, []);
 
-  const handleCircleClick = () => {
+  const handleUploadSlotClick = () => {
     fileInputRef.current?.click();
   };
 
@@ -449,8 +436,8 @@ function App() {
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      alert("File size must be less than 10MB.");
+    if (file.size > 15 * 1024 * 1024) {
+      alert("File size must be less than 15MB.");
       return;
     }
 
@@ -501,7 +488,7 @@ function App() {
 
   const generateFlyer = useCallback(
     (imageToUse) => {
-      console.log("Starting flyer generation...");
+      console.log("Starting Camp Meeting 2026 flyer generation...");
 
       if (!imageToUse || !canvasRef.current) {
         console.error("Missing imageToUse or canvas");
@@ -523,7 +510,7 @@ function App() {
 
       try {
         console.log(
-          "Background template available:",
+          "Background template dimensions:",
           backgroundTemplate.width,
           "x",
           backgroundTemplate.height,
@@ -532,55 +519,28 @@ function App() {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext("2d");
 
-        canvas.width = 1080;
-        canvas.height = 1080;
-        ctx.clearRect(0, 0, 1080, 1080);
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
+        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-        console.log("Drawing background template on canvas...");
-        ctx.drawImage(backgroundTemplate, 0, 0, 1080, 1080);
-        console.log("Background template drawn on canvas successfully");
+        // 1. Draw base 2026 template (1080x1350)
+        ctx.drawImage(backgroundTemplate, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-        const centerX = CIRCLE_CENTER_X;
-        const centerY = CIRCLE_CENTER_Y;
-        const radius = CIRCLE_RADIUS;
-
+        // 2. Draw user photo into the rectangular placeholder slot (414x551 at x:71, y:418)
         ctx.save();
         ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-        ctx.closePath();
+        ctx.rect(PHOTO_SLOT.x, PHOTO_SLOT.y, PHOTO_SLOT.width, PHOTO_SLOT.height);
         ctx.clip();
-
-        const size = radius * 2;
-        // Clip the canvas to a circle before drawing the image
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, true);
-        ctx.closePath();
-        ctx.clip();
-
-        // Calculate aspect ratio fit (cover mode)
-        const imgAspect = imageToUse.width / imageToUse.height;
-        const circleSize = radius * 2;
-        let drawWidth, drawHeight;
-
-        if (imgAspect > 1) {
-          // Image is wider than tall → fit to circle width
-          drawWidth = circleSize;
-          drawHeight = circleSize / imgAspect;
-        } else {
-          // Image is taller than wide → fit to circle height
-          drawHeight = circleSize;
-          drawWidth = circleSize * imgAspect;
-        }
-
-        // Center the image within the circle
-        const drawX = centerX - drawWidth / 2;
-        const drawY = centerY - drawHeight / 2;
-
-        ctx.drawImage(imageToUse, drawX, drawY, drawWidth, drawHeight);
+        ctx.drawImage(
+          imageToUse,
+          PHOTO_SLOT.x,
+          PHOTO_SLOT.y,
+          PHOTO_SLOT.width,
+          PHOTO_SLOT.height,
+        );
         ctx.restore();
 
-        console.log("Photo positioned at:", { centerX, centerY, radius });
+        console.log("Photo positioned at slot:", PHOTO_SLOT);
 
         const dataURL = canvas.toDataURL("image/png");
         setGeneratedImage(dataURL);
@@ -600,7 +560,7 @@ function App() {
 
     const link = document.createElement("a");
     link.href = generatedImage;
-    link.download = "CCIC-Camp-Meeting-2025-Flyer.png";
+    link.download = "CCIC-Camp-Meeting-2026-Flyer.png";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -620,7 +580,7 @@ function App() {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#001725",
+        background: "linear-gradient(135deg, #181106 0%, #291804 50%, #120a02 100%)",
         padding: "20px",
         fontFamily:
           '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -630,11 +590,11 @@ function App() {
     >
       <div
         style={{
-          maxWidth: "800px",
+          maxWidth: "840px",
           margin: "0 auto",
-          backgroundColor: "white",
-          borderRadius: "20px",
-          boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
+          backgroundColor: "#ffffff",
+          borderRadius: "24px",
+          boxShadow: "0 25px 50px rgba(0,0,0,0.5), 0 0 40px rgba(217, 119, 6, 0.15)",
           overflow: "hidden",
           flex: "1",
         }}
@@ -642,44 +602,63 @@ function App() {
         {/* Header */}
         <div
           style={{
-            background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
+            background: "linear-gradient(135deg, #78350f 0%, #b45309 50%, #d97706 100%)",
             color: "white",
-            padding: window.innerWidth <= 768 ? "20px 15px" : "30px",
+            padding: window.innerWidth <= 768 ? "24px 16px" : "32px 24px",
             textAlign: "center",
+            boxShadow: "inset 0 -2px 10px rgba(0,0,0,0.2)",
           }}
         >
+          <div
+            style={{
+              display: "inline-block",
+              padding: "4px 14px",
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+              borderRadius: "20px",
+              fontSize: "0.85rem",
+              fontWeight: "bold",
+              letterSpacing: "1px",
+              marginBottom: "10px",
+              textTransform: "uppercase",
+            }}
+          >
+            Walking in Dominion
+          </div>
           <h1
             style={{
               margin: "0 0 8px 0",
-              fontSize: window.innerWidth <= 768 ? "1.8rem" : "2.5rem",
-              fontWeight: "bold",
+              fontSize: window.innerWidth <= 768 ? "1.8rem" : "2.6rem",
+              fontWeight: "900",
+              letterSpacing: "-0.5px",
               lineHeight: "1.2",
+              textShadow: "0 2px 8px rgba(0,0,0,0.3)",
             }}
           >
-            CCIC Camp Meeting 2025
+            CCIC Camp Meeting 2026
           </h1>
           <p
             style={{
               margin: 0,
-              fontSize: window.innerWidth <= 768 ? "0.95rem" : "1.1rem",
-              opacity: 0.9,
+              fontSize: window.innerWidth <= 768 ? "0.95rem" : "1.15rem",
+              opacity: 0.95,
+              fontWeight: "400",
             }}
           >
-            Create Your Personalized Flyer
+            Create & Download Your Personalized Flyer
           </p>
         </div>
 
-        <div style={{ padding: "30px" }}>
+        <div style={{ padding: window.innerWidth <= 768 ? "20px 15px" : "35px" }}>
           {/* Initial Step */}
           {step === "initial" && (
             <div style={{ textAlign: "center" }}>
               {templateLoading ? (
-                <div>
+                <div style={{ padding: "60px 0" }}>
                   <div style={{ fontSize: "4rem", marginBottom: "20px" }}>
-                    🎨
+                    ✨
                   </div>
                   <p style={{ fontSize: "1.2rem", color: "#6b7280" }}>
-                    Loading flyer template...
+                    Loading Camp Meeting 2026 flyer template...
                   </p>
                 </div>
               ) : (
@@ -688,43 +667,48 @@ function App() {
                     style={{
                       position: "relative",
                       display: "inline-block",
-                      borderRadius: "15px",
+                      borderRadius: "16px",
                       overflow: "hidden",
-                      boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-                      marginBottom: "30px",
+                      boxShadow: "0 12px 35px rgba(0,0,0,0.25)",
+                      marginBottom: "25px",
                     }}
                   >
                     <img
-                      src="/images/back.png"
-                      alt="Camp Meeting Flyer"
+                      src="/images/back2.png"
+                      alt="Camp Meeting 2026 Flyer Template"
                       style={{
                         width: "100%",
-                        maxWidth: "400px",
+                        maxWidth: "420px",
                         height: "auto",
                         display: "block",
                       }}
                     />
+                    {/* Interactive upload overlay over the rectangular photo slot */}
                     <div
-                      onClick={handleCircleClick}
+                      onClick={handleUploadSlotClick}
+                      role="button"
+                      tabIndex={0}
+                      title="Click to upload your photo"
                       style={{
                         position: "absolute",
-                        top: "15%",
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        width: "120px",
-                        height: "120px",
-                        borderRadius: "50%",
+                        top: "30.96%", // 418 / 1350
+                        left: "6.57%", // 71 / 1080
+                        width: "38.33%", // 414 / 1080
+                        height: "40.81%", // 551 / 1350
+                        borderRadius: "6px",
                         backgroundColor: isLoading
-                          ? "rgba(59, 130, 246, 0.8)"
-                          : "rgba(255, 255, 255, 0.9)",
-                        border: "3px dashed #3b82f6",
+                          ? "rgba(217, 119, 6, 0.85)"
+                          : "rgba(255, 255, 255, 0.8)",
+                        border: "3px dashed #b45309",
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
                         justifyContent: "center",
                         cursor: "pointer",
                         transition: "all 0.3s ease",
-                        backdropFilter: "blur(10px)",
+                        backdropFilter: "blur(6px)",
+                        boxShadow: "0 6px 20px rgba(0,0,0,0.18)",
+                        padding: "10px",
                       }}
                     >
                       {isLoading ? (
@@ -734,23 +718,44 @@ function App() {
                             animation: "spin 1s linear infinite",
                           }}
                         >
-                          📷
+                          ⏳
                         </div>
                       ) : (
                         <>
                           <div
-                            style={{ fontSize: "2rem", marginBottom: "5px" }}
+                            style={{
+                              width: "48px",
+                              height: "48px",
+                              borderRadius: "50%",
+                              backgroundColor: "#b45309",
+                              color: "white",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "1.8rem",
+                              marginBottom: "8px",
+                              boxShadow: "0 4px 10px rgba(180, 83, 9, 0.35)",
+                            }}
                           >
                             +
                           </div>
                           <span
                             style={{
-                              fontSize: "0.8rem",
-                              color: "#3b82f6",
+                              fontSize: "0.95rem",
+                              color: "#78350f",
                               fontWeight: "bold",
                             }}
                           >
-                            Add Photo
+                            Add Your Photo
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              color: "#92400e",
+                              marginTop: "4px",
+                            }}
+                          >
+                            Tap here
                           </span>
                         </>
                       )}
@@ -760,13 +765,33 @@ function App() {
                   <p
                     style={{
                       fontSize: "1.1rem",
-                      color: "#6b7280",
-                      marginBottom: "20px",
+                      color: "#4b5563",
+                      marginBottom: "24px",
+                      maxWidth: "500px",
+                      margin: "0 auto 24px",
+                      lineHeight: "1.5",
                     }}
                   >
-                    Click the circle on the flyer above to upload your photo and
-                    create your personalized flyer!
+                    Click the photo area on the flyer above to upload your photo and generate your personalized Camp Meeting 2026 flyer!
                   </p>
+
+                  <button
+                    onClick={handleUploadSlotClick}
+                    style={{
+                      padding: "14px 36px",
+                      borderRadius: "50px",
+                      fontSize: "1.1rem",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
+                      color: "white",
+                      border: "none",
+                      boxShadow: "0 6px 20px rgba(217, 119, 6, 0.35)",
+                      transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                    }}
+                  >
+                    📷 Upload Photo
+                  </button>
                 </>
               )}
             </div>
@@ -783,7 +808,7 @@ function App() {
 
           {/* Processing Step */}
           {step === "uploaded" && (
-            <div style={{ textAlign: "center", padding: "40px 0" }}>
+            <div style={{ textAlign: "center", padding: "50px 0" }}>
               <div
                 style={{
                   fontSize: "4rem",
@@ -791,10 +816,10 @@ function App() {
                   animation: "spin 2s linear infinite",
                 }}
               >
-                🎨
+                ✨
               </div>
-              <p style={{ fontSize: "1.2rem", color: "#6b7280" }}>
-                Creating your personalized flyer...
+              <p style={{ fontSize: "1.3rem", color: "#78350f", fontWeight: "600" }}>
+                Creating your personalized Camp Meeting 2026 flyer...
               </p>
             </div>
           )}
@@ -804,38 +829,40 @@ function App() {
             <div style={{ textAlign: "center" }}>
               <div
                 style={{
-                  display: "flex",
+                  display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  marginBottom: "30px",
-                  padding: "15px 30px",
-                  backgroundColor: "#dcfce7",
+                  marginBottom: "25px",
+                  padding: "12px 28px",
+                  backgroundColor: "#fef3c7",
+                  border: "1px solid #fde68a",
                   borderRadius: "50px",
-                  color: "#166534",
+                  color: "#92400e",
                   fontWeight: "bold",
+                  fontSize: "1.05rem",
                 }}
               >
-                <span style={{ fontSize: "1.5rem", marginRight: "10px" }}>
-                  ✅
+                <span style={{ fontSize: "1.3rem", marginRight: "10px" }}>
+                  🎉
                 </span>
-                Your personalized flyer is ready!
+                Your Camp Meeting 2026 flyer is ready!
               </div>
 
               <div
                 style={{
-                  marginBottom: "30px",
-                  borderRadius: "15px",
+                  marginBottom: "25px",
+                  borderRadius: "16px",
                   overflow: "hidden",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+                  boxShadow: "0 15px 40px rgba(0,0,0,0.3)",
                   display: "inline-block",
                 }}
               >
                 <img
                   src={generatedImage}
-                  alt="Generated Flyer"
+                  alt="Generated Camp Meeting 2026 Flyer"
                   style={{
                     width: "100%",
-                    maxWidth: "400px",
+                    maxWidth: "420px",
                     height: "auto",
                     display: "block",
                   }}
@@ -853,16 +880,16 @@ function App() {
                 <button
                   onClick={downloadFlyer}
                   style={{
-                    backgroundColor: "#3b82f6",
+                    background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
                     color: "white",
                     border: "none",
-                    padding: "15px 30px",
+                    padding: "16px 36px",
                     borderRadius: "50px",
                     fontSize: "1.1rem",
                     fontWeight: "bold",
                     cursor: "pointer",
                     transition: "all 0.3s ease",
-                    boxShadow: "0 4px 15px rgba(59, 130, 246, 0.3)",
+                    boxShadow: "0 6px 20px rgba(217, 119, 6, 0.4)",
                   }}
                 >
                   📥 Download Flyer
@@ -870,10 +897,10 @@ function App() {
                 <button
                   onClick={resetApp}
                   style={{
-                    backgroundColor: "#6b7280",
-                    color: "white",
+                    backgroundColor: "#e5e7eb",
+                    color: "#374151",
                     border: "none",
-                    padding: "15px 30px",
+                    padding: "16px 32px",
                     borderRadius: "50px",
                     fontSize: "1.1rem",
                     fontWeight: "bold",
@@ -903,10 +930,10 @@ function App() {
       <footer
         style={{
           textAlign: "center",
-          padding: "20px",
-          color: "#ffffff",
-          fontSize: "0.9rem",
-          opacity: 0.8,
+          padding: "24px 20px",
+          color: "#fef3c7",
+          fontSize: "0.95rem",
+          opacity: 0.9,
         }}
       >
         Developed by{" "}

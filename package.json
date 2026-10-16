@@ -1,7 +1,7 @@
 {
   "name": "camp-meeting-app",
   "version": "1.0.0",
-  "description": "CCIC Camp Meeting 2025 - Photo Upload App",
+  "description": "CCIC Camp Meeting 2026 - Photo Upload App",
   "type": "module",
   "scripts": {
     "dev": "vite",
